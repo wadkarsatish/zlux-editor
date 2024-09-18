@@ -19,9 +19,9 @@ import { ProjectDef } from '../../model/project';
   styleUrls: ['../../../../styles.scss']
 })
 export class OpenProjectComponent implements OnInit {
-  private projectList: ProjectDef[] = [];
-  private selected: ProjectDef;
-  private fetching = false;
+  projectList: ProjectDef[] = [];
+  selected: ProjectDef;
+  fetching = false;
 
   constructor(private http: HttpService, private dialogRef: MatDialogRef<OpenProjectComponent>) { }
 

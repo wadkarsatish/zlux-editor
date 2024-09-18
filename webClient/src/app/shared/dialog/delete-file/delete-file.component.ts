@@ -17,8 +17,8 @@ import { Component, OnInit } from '@angular/core';
 })
 export class DeleteFileComponent implements OnInit {
 
-  private value = '';
-  private FileName_Pattern = /^([^\x00-\x1F!"$'\(\)*,\/:;<>\?\[\\\]\{\|\}\x7F\s]+)\.([a-zA-Z0-9]*)$/;
+  value = '';
+  FileName_Pattern = /^([^\x00-\x1F!"$'\(\)*,\/:;<>\?\[\\\]\{\|\}\x7F\s]+)\.([a-zA-Z0-9]*)$/;
 
   constructor() { }
 

@@ -9,8 +9,8 @@
   Copyright Contributors to the Zowe Project.
 */
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -22,8 +22,8 @@ import { EditorService } from './editor.service';
 // import { EditorRoutingModule } from './editor-routing.module';
 import { FrameComponent } from './frame/frame.component';
 import { ProjectTreeComponent } from './project-tree/project-tree.component';
-import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
-import { FileTreeModule } from '@zowe/zlux-angular-file-tree/src/plugin';
+// import { PerfectScrollbarModule } from 'ngx-perfect-scrollbar';
+import { ZluxFileTreeModule } from 'zlux-angular-file-tree';
 import { CodeEditorModule } from './code-editor/code-editor.module';
 
 @NgModule({
@@ -36,13 +36,17 @@ import { CodeEditorModule } from './code-editor/code-editor.module';
     MatExpansionModule,
     MatSnackBarModule,
     MatInputModule,
-    FileTreeModule,
+    ZluxFileTreeModule,
     // EditorRoutingModule,
-    PerfectScrollbarModule,
+    // PerfectScrollbarModule,
     CodeEditorModule,
   ],
   providers: [EditorService],
-  declarations: [EditorComponent, FrameComponent, ProjectTreeComponent],
+  declarations: [
+    EditorComponent,
+    FrameComponent,
+    ProjectTreeComponent
+  ],
   exports: [EditorComponent],
 })
 export class EditorModule { }

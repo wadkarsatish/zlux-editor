@@ -17,7 +17,7 @@ import { LanguageServerService } from '../../language-server/language-server.ser
   styleUrls: ['../../../../styles.scss']
 })
 export class LanguageServerComponent implements OnInit {
-  private settings = {
+  settings = {
     config: '',
     enable: true,
   };

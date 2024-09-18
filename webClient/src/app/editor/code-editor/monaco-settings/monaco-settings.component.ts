@@ -60,7 +60,7 @@ export class MonacoSettingsComponent implements OnInit {
     this.items = items;
   }
 
-  private resetToDefault() {
+  resetToDefault() {
     this.http.delete<any>(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'user','monaco','editorconfig.json'))
     .subscribe((response: any) => {
       this.log.info('Restored editor defaults by removing old configuration');

@@ -30,9 +30,9 @@ const DEFAULT_TITLE = 'Editor';
   styleUrls: ['./code-editor.component.scss']
 })
 export class CodeEditorComponent implements OnInit, OnDestroy {
-  private openFileList: ProjectContext[];
-  private noOpenFile: boolean;
-  private keyBindingSub:Subscription = new Subscription();
+  public openFileList: ProjectContext[];
+  public noOpenFile: boolean;
+  public keyBindingSub: Subscription = new Subscription();
   @ViewChild('monaco')
   monacoRef: ElementRef;
 
@@ -75,17 +75,17 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
     @Inject(Angular2InjectionTokens.PLUGIN_DEFINITION) private pluginDefinition: ZLUX.ContainerPluginDefinition,
     private codeEditorService: CodeEditorService) {
     if (this.windowEvents) {
-      this.windowEvents.restored.subscribe(()=> {
+      this.windowEvents.restored.subscribe(() => {
         this.focus();
       });
     }
-    this.http.get(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(),'user','monaco','editorconfig.json'))
+    this.http.get(ZoweZLUX.uriBroker.pluginConfigForScopeUri(this.pluginDefinition.getBasePlugin(), 'user', 'monaco', 'editorconfig.json'))
       .subscribe((response: any) => {
         if (response && response.contents && response.contents.config) {
           this.options = response.contents.config;
         }
       });
-    
+
     //respond to the request to open
     this.editorControl.openFileEmitter.subscribe((fileNode: ProjectStructure) => {
       this.editorControl.compareDataset = false;
@@ -132,7 +132,7 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
       this.previousSessionData.editorFile = this.editorFile;
 
       this.noOpenFile = true;
-      this.editorFile = undefined; 
+      this.editorFile = undefined;
       this.updateEditorTitle();
     })
 
@@ -168,7 +168,7 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
           },
           opened: true,
           active: true, //TODO what happens to previously active file
-          changed: false        
+          changed: false
         });
       }
     });
@@ -186,21 +186,21 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
 
     this.keyBindingSub.add(this.appKeyboard.keydownEvent.subscribe((event) => {
       if (event.which === KeyCode.KEY_T && event.ctrlKey) {
-        this.editorControl.undoCloseFile.next();
+        this.editorControl.undoCloseFile.next('');
       }
     }));
 
     this.keyBindingSub.add(this.appKeyboard.keyupEvent.subscribe((event) => {
       if (event.which === KeyCode.PAGE_DOWN || event.which === KeyCode.PERIOD) {
         let fileContext = this.editorControl.fetchRightOfActiveFile();
-        this.selectFile(fileContext, true);      
+        this.selectFile(fileContext, true);
       } else if (event.which === KeyCode.PAGE_UP || event.which === KeyCode.COMMA) {
         let fileContext = this.editorControl.fetchLeftOfActiveFile();
-        this.selectFile(fileContext, true);      
+        this.selectFile(fileContext, true);
       } else if (event.which === KeyCode.KEY_W && !event.shiftKey) { // Separate keybinding for "close all"
         let fileContext = this.editorControl.fetchActiveFile();
         this.closeFile(fileContext);
-        setTimeout(()=> {
+        setTimeout(() => {
           this.editorControl.getFocus();
         });
       }
@@ -218,15 +218,15 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
       this.options = options;
     }
   }
-  
-  updateEditorTitle():void {
-    if(this.noOpenFile) {
+
+  updateEditorTitle(): void {
+    if (this.noOpenFile) {
       this.setTitle();
       return;
-    } 
+    }
 
     const fileContext = this.getActiveFile();
-    if(fileContext) {
+    if (fileContext) {
       this.setTitle(fileContext.name);
     } else {
       this.setTitle();
@@ -234,11 +234,11 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
   }
 
   getActiveFile() {
-    return this.openFileList.find(f=>f.active);
+    return this.openFileList.find(f => f.active);
   }
 
-  isAnySelected () {
-    return typeof(this.getActiveFile()) != "undefined";
+  isAnySelected() {
+    return typeof (this.getActiveFile()) != "undefined";
   }
 
   focus() {
@@ -272,7 +272,7 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
       this.editorFile = { context: fileContext, reload: true, line: fileContext.model.line || fileNode.line };
       this.editorControl.openFileHandler(fileContext);
     }
-    
+
   }
 
   private handleCloseFile(fileContext: ProjectContext) {
@@ -294,7 +294,7 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
     } else {
       const directory = fileContext.model.path || this.editorControl.activeDirectory;
       this.monacoService.promptToSave(fileContext).then((res) => {
-        if(res !== 'Cancel'){
+        if (res !== 'Cancel') {
           this.codeEditorService.closeFile(fileContext);
         }
       });
@@ -330,12 +330,12 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
     this.editorControl.removeActiveFromAllFiles();
     fileContext.active = true;
     this.monacoService.savePreviousFileContent(fileContext);
-    this.editorControl.enableDiffViewer.next();
+    this.editorControl.enableDiffViewer.next('');
   }
 
-  setTitle(title?:String):void {
-    let newTitle = DEFAULT_TITLE; 
-    if(title) {
+  setTitle(title?: String): void {
+    let newTitle = DEFAULT_TITLE;
+    if (title) {
       newTitle = title + ' - ' + newTitle;
     }
 
@@ -348,7 +348,7 @@ export class CodeEditorComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy():void {
+  ngOnDestroy(): void {
     this.keyBindingSub.unsubscribe();
   }
 }

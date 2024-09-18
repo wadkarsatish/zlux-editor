@@ -17,13 +17,13 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
   styleUrls: ['../../../../styles.scss']
 })
 export class SaveToComponent {
-  private results = {
+  results = {
     directory: '',
     fileName: '',
     encoding: '',
   };
   
-  private options: string[];
+  options: string[];
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
     if (this.data.canBeISO === false) {

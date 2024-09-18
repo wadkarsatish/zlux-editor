@@ -747,7 +747,7 @@ export class EditorControlService implements ZLUX.IEditor, ZLUX.IEditorMultiBuff
         this.closeFileHandler(fileContext);
         this.closeFile.next(fileContext);
         this.openBuffer('', updatedFileContext.model);
-        this.refreshLayout.next();
+        this.refreshLayout.next('');
         acceptChangeSub.unsubscribe();
         overwriteSub.unsubscribe();
       })

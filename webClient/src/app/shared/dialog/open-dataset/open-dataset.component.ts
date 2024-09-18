@@ -20,8 +20,8 @@ import { ENDPOINTS } from '../../../../environments/environment';
 })
 export class OpenDatasetComponent implements OnInit {
 
-  private fetching = false;
-  private value = '';
+  fetching = false;
+  value = '';
 
   constructor(private http: HttpService, private dialogRef: MatDialogRef<OpenDatasetComponent>) { }
 

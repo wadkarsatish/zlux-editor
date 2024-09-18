@@ -9,7 +9,8 @@
   Copyright Contributors to the Zowe Project.
 */
 import { Component, OnInit, Input, OnChanges, SimpleChanges, Inject, ViewChild, ElementRef } from '@angular/core';
-import { listen, MessageConnection } from 'vscode-ws-jsonrpc/lib';
+import { listen } from 'vscode-ws-jsonrpc';
+import { MessageConnection } from 'vscode-jsonrpc';
 import {
   BaseLanguageClient, CloseAction, ErrorAction,
   createMonacoServices, createConnection,
@@ -34,32 +35,32 @@ const ReconnectingWebSocket = require('reconnecting-websocket');
 })
 export class MonacoComponent implements OnInit, OnChanges {
   private _options: any;
-  
+
   @Input()
   get options(): any { return this._options; }
   set options(options: any) {
-    if (!options) {return;}
+    if (!options) { return; }
     this._options = options;
     if (this.editor) {
       if (options.theme) {
         this.editorControl._setDefaultTheme(options.theme);
         this.editorControl.setTheme(options.theme);
       }
-      
+
       this.editor.updateOptions(options);
     } else {
       this.log.debug("Editor options passed prior to editor init. Cached.");
     }
   };
-  
+
   @Input() editorFile;
   @Input() compareDataset;
   @ViewChild('monacoEditor', { static: true })
   monacoEditorRef: ElementRef;
   private editor: any;
   private monacoConfig: MonacoConfig;
-  private showEditor: boolean;
-  private showDiffViewer: boolean;
+  public showEditor: boolean;
+  public showDiffViewer: boolean;
   private keyBindingSub: Subscription = new Subscription();
 
   constructor(
@@ -71,28 +72,28 @@ export class MonacoComponent implements OnInit, OnChanges {
     @Inject(Angular2InjectionTokens.LOGGER) private log: ZLUX.ComponentLogger,
     @Inject(Angular2InjectionTokens.PLUGIN_DEFINITION) private pluginDefinition: ZLUX.ContainerPluginDefinition,
     @Inject(Angular2InjectionTokens.VIEWPORT_EVENTS) private viewportEvents: Angular2PluginViewportEvents) {
-      this.keyBindingSub.add(this.appKeyboard.keydownEvent.subscribe((event) => {
-        if (event.which === KeyCode.KEY_V) {
-          this.editorControl.toggleDiffViewer.next();
-        }
-      }));
+    this.keyBindingSub.add(this.appKeyboard.keydownEvent.subscribe((event) => {
+      if (event.which === KeyCode.KEY_V) {
+        this.editorControl.toggleDiffViewer.next('');
+      }
+    }));
   }
 
   ngOnInit() {
     this.monacoConfig = new MonacoConfig();
     let options = this._options ? Object.assign({}, this._options) : {};
     const hasModel = !!options.model;
-    
+
     if (hasModel) {
       const model = monaco.editor.getModel(options.model.uri || '');
-      if(model) {
+      if (model) {
         options.model = model;
         options.model.setValue('');
       } else {
         options.model = monaco.editor.createModel(options.model.value, options.model.language, options.model.uri);
       }
     }
-    this.log.debug("New editor with options=",options);
+    this.log.debug("New editor with options=", options);
     let editor = monaco.editor.create(this.monacoEditorRef.nativeElement, options);
     if (options.theme) {
       this.editorControl._setDefaultTheme(options.theme);
@@ -103,34 +104,34 @@ export class MonacoComponent implements OnInit, OnChanges {
     this.editor = editor;
 
     this.monacoConfig.onLoad();
-    
+
     this.onMonacoInit(editor);
     monaco.editor.remeasureFonts();
     this.showEditor = true;
 
-    this.editorControl.toggleDiffViewer.subscribe(() =>{
+    this.editorControl.toggleDiffViewer.subscribe(() => {
       this.toggleDiffViewer();
     });
 
-    this.editorControl.enableDiffViewer.subscribe(() =>{
+    this.editorControl.enableDiffViewer.subscribe(() => {
       this.showEditor = !this.monacoService.spawnDiffViewer();
       this.showDiffViewer = !this.showEditor;
     });
-    
-    this.editorControl.refreshLayout.subscribe(() =>{
+
+    this.editorControl.refreshLayout.subscribe(() => {
       setTimeout(() => this.editor.layout(), 1);
     });
 
     this.editor.onContextMenu((e: any) => {
-      if(e.target.type === 3){ //if right click is on top of the line numbers
+      if (e.target.type === 3) { //if right click is on top of the line numbers
         this.viewportEvents.spawnContextMenu(e.event.browserEvent.clientX, e.event.browserEvent.clientY, [
           {
             text: 'Copy permalink',
-            action: () => this.copyPermalink(e)               
+            action: () => this.copyPermalink(e)
           },
           {
             text: 'Copy line',
-            action: () => this.copyLine(e)               
+            action: () => this.copyLine(e)
           }
         ], true)
       }
@@ -152,7 +153,7 @@ export class MonacoComponent implements OnInit, OnChanges {
           changes[input].currentValue['reload'],
           changes[input].currentValue['line']);
         //TODO: This is a workaround to instruct the editor to remeasure its container when switching from diff-viewer to code-editor
-        if(this.showDiffViewer) {
+        if (this.showDiffViewer) {
           setTimeout(() => this.editor.layout(), 1);
         }
         this.showEditor = true;
@@ -161,59 +162,59 @@ export class MonacoComponent implements OnInit, OnChanges {
     }
   }
 
-  
+
   onMonacoInit(editor) {
     this.editorControl.editor.next(editor);
     this.keyBinds(editor);
-    this.viewportEvents.resized.subscribe(()=> {
+    this.viewportEvents.resized.subscribe(() => {
       editor.layout()
     });
-      /* disable for now...
-    this.editorControl.connToLS.subscribe((lang) => {
-      this.connectToLanguageServer(lang);
-    });
-    this.editorControl.disFromLS.subscribe((lang) => {
-      this.closeLanguageServer(lang);
-    });
+    /* disable for now...
+  this.editorControl.connToLS.subscribe((lang) => {
+    this.connectToLanguageServer(lang);
+  });
+  this.editorControl.disFromLS.subscribe((lang) => {
+    this.closeLanguageServer(lang);
+  });
 
-    this.connectToLanguageServer();
-    */
+  this.connectToLanguageServer();
+  */
   }
 
   keyBinds(editor: any) {
     let self = this;
     //editor.addAction({
-      // An unique identifier of the contributed action.
-      //id: 'save-all',
+    // An unique identifier of the contributed action.
+    //id: 'save-all',
 
-      // A label of the action that will be presented to the user.
-      //label: 'Save All',
+    // A label of the action that will be presented to the user.
+    //label: 'Save All',
 
-      // An optional array of keybindings for the action.
-      //keybindings: [
-        // tslint:disable-next-line:no-bitwise
-        //monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S
-        // chord
-        // tslint:disable-next-line:no-bitwise
-        // monaco.KeyMod.chord(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_M)
-      //],
+    // An optional array of keybindings for the action.
+    //keybindings: [
+    // tslint:disable-next-line:no-bitwise
+    //monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S
+    // chord
+    // tslint:disable-next-line:no-bitwise
+    // monaco.KeyMod.chord(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_M)
+    //],
 
-      // A precondition for this action.
-      //precondition: null,
+    // A precondition for this action.
+    //precondition: null,
 
-      // A rule to evaluate on top of the precondition in order to dispatch the keybindings.
-      //keybindingContext: null,
+    // A rule to evaluate on top of the precondition in order to dispatch the keybindings.
+    //keybindingContext: null,
 
-      //contextMenuGroupId: 'file',
+    //contextMenuGroupId: 'file',
 
-      //contextMenuOrder: 1.1,
+    //contextMenuOrder: 1.1,
 
-      // Method that will be executed when the action is triggered.
-      // @param editor The editor instance is passed in as a convenience
-      //run: function (ed) {
-        //self.editorControl.saveAllFile.emit();
-        //return null;
-      //}
+    // Method that will be executed when the action is triggered.
+    // @param editor The editor instance is passed in as a convenience
+    //run: function (ed) {
+    //self.editorControl.saveAllFile.emit();
+    //return null;
+    //}
     //});
     editor.addAction({
       // An unique identifier of the contributed action.
@@ -225,7 +226,7 @@ export class MonacoComponent implements OnInit, OnChanges {
       // An optional array of keybindings for the action.
       keybindings: [
         // tslint:disable-next-line:no-bitwise
-        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S
+        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS
         // chord
         // tslint:disable-next-line:no-bitwise
         // monaco.KeyMod.chord(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_M)
@@ -250,35 +251,35 @@ export class MonacoComponent implements OnInit, OnChanges {
     });
   }
 
-  copyPermalink(event: any){
-      const lines = event.target.position.lineNumber;
-      const activeFile = this.editorControl.fetchActiveFile();
-      let filePath = '';
-      let link = '';
-      if(activeFile.model.isDataset){
-        filePath = activeFile.model.path;
-        link = `${window.location.origin}${window.location.pathname}?pluginId=${this.pluginDefinition.getBasePlugin().getIdentifier()}:data:${encodeURIComponent(`{"type":"openDataset","name":"${filePath}","lines":"${lines}","toggleTree":true}`)}`;
-      } else {
-        filePath = activeFile.model.path + "/" + activeFile.model.name;
-        link = `${window.location.origin}${window.location.pathname}?pluginId=${this.pluginDefinition.getBasePlugin().getIdentifier()}:data:${encodeURIComponent(`{"type":"openFile","name":"${filePath}","lines":"${lines}","toggleTree":true}`)}`;
-      }
-      navigator.clipboard.writeText(link).then(() => {
-        this.log.debug("Permalink copied to clipboard");
-      }).catch((error) => {
-        console.error("Failed to copy permalink Error: " + error); 
-        this.snackBar.open("Failed to copy permalink. Error: " + error, 'Dismiss', { duration: MessageDuration.Short, panelClass: 'center' });
-      });
+  copyPermalink(event: any) {
+    const lines = event.target.position.lineNumber;
+    const activeFile = this.editorControl.fetchActiveFile();
+    let filePath = '';
+    let link = '';
+    if (activeFile.model.isDataset) {
+      filePath = activeFile.model.path;
+      link = `${window.location.origin}${window.location.pathname}?pluginId=${this.pluginDefinition.getBasePlugin().getIdentifier()}:data:${encodeURIComponent(`{"type":"openDataset","name":"${filePath}","lines":"${lines}","toggleTree":true}`)}`;
+    } else {
+      filePath = activeFile.model.path + "/" + activeFile.model.name;
+      link = `${window.location.origin}${window.location.pathname}?pluginId=${this.pluginDefinition.getBasePlugin().getIdentifier()}:data:${encodeURIComponent(`{"type":"openFile","name":"${filePath}","lines":"${lines}","toggleTree":true}`)}`;
+    }
+    navigator.clipboard.writeText(link).then(() => {
+      this.log.debug("Permalink copied to clipboard");
+    }).catch((error) => {
+      console.error("Failed to copy permalink Error: " + error);
+      this.snackBar.open("Failed to copy permalink. Error: " + error, 'Dismiss', { duration: MessageDuration.Short, panelClass: 'center' });
+    });
   }
 
-  copyLine(event: any){
-      const lines = event.target.position.lineNumber;
-      const lineContent = this.editor.getModel().getLineContent(lines);
-      navigator.clipboard.writeText(lineContent).then(() => {
-        this.log.debug("Line copied to clipboard");
-      }).catch((error) => {
-        console.error("Failed to copy line. Error: " + error);
-        this.snackBar.open("Failed to copy line. Error: " + error, 'Dismiss', { duration: MessageDuration.Short, panelClass: 'center' });
-      });
+  copyLine(event: any) {
+    const lines = event.target.position.lineNumber;
+    const lineContent = this.editor.getModel().getLineContent(lines);
+    navigator.clipboard.writeText(lineContent).then(() => {
+      this.log.debug("Line copied to clipboard");
+    }).catch((error) => {
+      console.error("Failed to copy line. Error: " + error);
+      this.snackBar.open("Failed to copy line. Error: " + error, 'Dismiss', { duration: MessageDuration.Short, panelClass: 'center' });
+    });
   }
 
   saveFile() {
@@ -333,7 +334,7 @@ export class MonacoComponent implements OnInit, OnChanges {
 
     listen({
       webSocket: langWebSocket,
-      onConnection: connection => {
+      onConnection: (connection: any) => {
         // create and start the language client
         const languageClient = this.createLanguageClient(lang, connection, langService);
         const disposable = languageClient.start();

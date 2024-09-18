@@ -69,7 +69,7 @@ export class MenuBarComponent implements OnInit, OnDestroy {
 
   @ViewChild('menubar', {static: true}) menuBarRef: ElementRef<any>;
 
-  private menuList: any = _.cloneDeep(MENU);
+  menuList: any = _.cloneDeep(MENU);
   //  MENU.slice(0);//clone to prevent language from persisting
   private currentLang: string | undefined;
   private fileCount: number = 0;
@@ -559,15 +559,15 @@ export class MenuBarComponent implements OnInit, OnDestroy {
   }
 
   toggleFileTreeSearch() {
-    this.editorControl.toggleFileTreeSearch.next();
+    this.editorControl.toggleFileTreeSearch.next('');
   }
 
   toggleDiffViewer() {
-    this.editorControl.toggleDiffViewer.next();
+    this.editorControl.toggleDiffViewer.next('');
   }
 
   toggleTree() {
-    this.editorControl.toggleTree.next();
+    this.editorControl.toggleTree.next('');
   }
 
   async closeAll() {
@@ -576,7 +576,7 @@ export class MenuBarComponent implements OnInit, OnDestroy {
     if (this.fileCount == 0) { 
       closeAllRef = this.snackBar.open('No tabs are open.', 'Close', { duration: MessageDuration.Short, panelClass: 'center' });
     } else {
-      this.editorControl.closeAllFiles.next();
+      this.editorControl.closeAllFiles.next('');
       // closeAllRef = this.snackBar.open('Closed.', 'Undo?', { duration: MessageDuration.Medium, panelClass: 'center' })
     }
 
@@ -719,7 +719,7 @@ export class MenuBarComponent implements OnInit, OnDestroy {
 
   createDirectory() {
     setTimeout(()=> {
-      this.editorControl.createDirectory.next();
+      this.editorControl.createDirectory.next('');
     });
   }
 
@@ -753,9 +753,9 @@ export class MenuBarComponent implements OnInit, OnDestroy {
       if (result) {
         this.languageServer.updateSettings(result);
         if (result.enable) {
-          this.editorControl.connToLS.next();
+          this.editorControl.connToLS.next('');
         } else {
-          this.editorControl.disFromLS.next();
+          this.editorControl.disFromLS.next('');
         }
       }
     });

@@ -27,8 +27,8 @@ export class ConfirmAction {
   constructor(
     public dialogRef: MatDialogRef<ConfirmAction>,
     @Inject(MAT_DIALOG_DATA) public data: DialogData
-  ) {}
-  
+  ) { }
+
   ngOnInit() {
   }
 

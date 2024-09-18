@@ -17,10 +17,9 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
   styleUrls: ['../../../../styles.scss']
 })
 export class OverwriteDatasetComponent{
-
-  private force: string;
-  private compare: string;
-  private datasetName: string;
+  force: string;
+  compare: string;
+  datasetName: string;
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: any) { 
     this.force = 'force';
