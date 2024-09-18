@@ -33,7 +33,7 @@ import * as _ from 'lodash';
 import { ProjectContext, ProjectContextType } from '../../shared/model/project-context';
 
 function initMenu(menuItems) {
-  menuItems.forEach(function(menuItem) {
+  menuItems.forEach(function (menuItem) {
     if (menuItem.action && !menuItem.action.func && menuItem.action.functionString) {
       menuItem.action.func = new Function('context', menuItem.action.functionString);
     }
@@ -48,7 +48,7 @@ function initMenus(menus) {
     return initMenu(menus);
   } else {
     const keys = (Object as any).keys(menus);
-    for (let i = 0; i < keys.length; i++){
+    for (let i = 0; i < keys.length; i++) {
       menus[keys[i]] = initMenu(menus[keys[i]]);
     }
     return menus;
@@ -63,11 +63,11 @@ function isHidden(el) {
 @Component({
   selector: 'app-menu-bar',
   templateUrl: './menu-bar.component.html',
-  styleUrls: ['./menu-bar.component.scss',  '../../../styles.scss']
+  styleUrls: ['./menu-bar.component.scss', '../../../styles.scss']
 })
 export class MenuBarComponent implements OnInit, OnDestroy {
 
-  @ViewChild('menubar', {static: true}) menuBarRef: ElementRef<any>;
+  @ViewChild('menubar', { static: true }) menuBarRef: ElementRef<any>;
 
   menuList: any = _.cloneDeep(MENU);
   //  MENU.slice(0);//clone to prevent language from persisting
@@ -79,13 +79,13 @@ export class MenuBarComponent implements OnInit, OnDestroy {
     children: []
   };
 
-  private keyBindingSub:Subscription = new Subscription();
+  private keyBindingSub: Subscription = new Subscription();
   public languagesMenu: any = (Object as any).assign({}, LANGUAGE_MENUS);//clone for sanitization
 
   /* TODO: This can be extended to persist in future server storage mechanisms. 
   (For example, when a user re-opens the Editor they are plopped back into their workflow) */
   private previousSessionData: any = {};
-  
+
   constructor(
     private http: HttpService,
     private editorControl: EditorControlService,
@@ -118,37 +118,37 @@ export class MenuBarComponent implements OnInit, OnDestroy {
     this.addToggleTreeMenus(this.menuList);
     this.languagesMenu = initMenus(this.languagesMenu);
 
-    this.editorControl.languageRegistered.subscribe((languageDefinition)=> {
+    this.editorControl.languageRegistered.subscribe((languageDefinition) => {
       this.resetLanguageSelectionMenu();
     });
 
     this.editorControl.openSettings.subscribe(() => {
       this.hideFileMenus();
     });
-    
-    this.editorControl.selectMenu.subscribe((fileContext)=> {
+
+    this.editorControl.selectMenu.subscribe((fileContext) => {
       this.setMenus(fileContext);
     });
-    
-    this.editorControl.selectFile.subscribe((fileContext)=> {
-      if (this.fileCount != 0){this.showFileMenus(fileContext);}
-         // get focus of editor
-      setTimeout(()=> {
+
+    this.editorControl.selectFile.subscribe((fileContext) => {
+      if (this.fileCount != 0) { this.showFileMenus(fileContext); }
+      // get focus of editor
+      setTimeout(() => {
         this.editorControl.getFocus();
       });
     });
 
-    this.editorControl.initializedFile.subscribe((fileContext)=> {
+    this.editorControl.initializedFile.subscribe((fileContext) => {
       this.showFileMenus(fileContext);
       this.fileCount++;
-      this.log.debug(`fileCount now=`,this.fileCount);
+      this.log.debug(`fileCount now=`, this.fileCount);
     });
 
-    this.editorControl.closeFile.subscribe(()=> {
+    this.editorControl.closeFile.subscribe(() => {
       this.previousSessionData.fileCount = this.fileCount;
       if (this.fileCount != 0) {
         this.fileCount--;
-        this.log.debug(`fileCount now=`,this.fileCount);
+        this.log.debug(`fileCount now=`, this.fileCount);
       } else {
         this.log.warn(`Open file count cannot be made negative`);
       }
@@ -161,7 +161,7 @@ export class MenuBarComponent implements OnInit, OnDestroy {
           // Reactivate languages menu. Select file selects correct language down stream
           let menus = [];
           menus.push(this.languageSelectionMenu);
-          this.menuList.splice(this.fileCount===0 ? 1 : 2 ,0,...menus);
+          this.menuList.splice(this.fileCount === 0 ? 1 : 2, 0, ...menus);
         }
         this.fileCount = this.previousSessionData.fileCount;
       }
@@ -186,12 +186,12 @@ export class MenuBarComponent implements OnInit, OnDestroy {
       // Reactivate languages menu. Select file selects correct language down stream
       let menus = [];
       menus.push(this.languageSelectionMenu);
-      this.menuList.splice(this.fileCount===0 ? 1 : 2 ,0,...menus);
+      this.menuList.splice(this.fileCount === 0 ? 1 : 2, 0, ...menus);
 
       this.log.debug('Attempted to restore session with data: ' + this.previousSessionData + " " + this.currentLang)
     });
 
-    this.editorControl.changeLanguage.subscribe((obj:{context: any, language: string})=> {
+    this.editorControl.changeLanguage.subscribe((obj: { context: any, language: string }) => {
       this.showLanguageMenu(obj.language);
     });
 
@@ -203,7 +203,7 @@ export class MenuBarComponent implements OnInit, OnDestroy {
       }
     });
 
-    sessionEvents.sessionExpire.subscribe(()=> {
+    sessionEvents.sessionExpire.subscribe(() => {
       this.dialog.closeAll();
     })
 
@@ -220,7 +220,7 @@ export class MenuBarComponent implements OnInit, OnDestroy {
 
   private setMenus(fileContext: ProjectContext) {
     if (fileContext.type == ProjectContextType.menu) {
-      this.hideFileMenus(); 
+      this.hideFileMenus();
     } else {
       this.showFileMenus(fileContext);
     }
@@ -262,12 +262,12 @@ export class MenuBarComponent implements OnInit, OnDestroy {
       }
     }
   }
-  
+
   private showSettings() {
     this.editorControl.openSettings.next();
   }
 
-  
+
   getMenuSectionElements() {
     return this.menuBarRef.nativeElement.getElementsByClassName("gz-menu-section");
   }
@@ -281,11 +281,11 @@ export class MenuBarComponent implements OnInit, OnDestroy {
     const editor = this.editorControl.editor.getValue();
     if (editor) {
       if (menuItem.isDisabled
-          && menuItem.isDisabled({
-            editor: editor,
-            controller: this.editorControl,
-            log: this.log
-          })) {
+        && menuItem.isDisabled({
+          editor: editor,
+          controller: this.editorControl,
+          log: this.log
+        })) {
         style.push('disabled');
       }
     }
@@ -293,7 +293,8 @@ export class MenuBarComponent implements OnInit, OnDestroy {
   }
 
   private resetLanguageSelectionMenu() {
-    this.languageSelectionMenu.children = this.monaco.languages.getLanguages().sort(function(lang1, lang2) {
+    this.languageSelectionMenu.children = this.monaco.languages.getLanguages().sort(function (lang1, lang2) {
+      debugger;
       let name1 = lang1.aliases[0].toLowerCase();
       let name2 = lang2.aliases[0].toLowerCase();
       if (name1 < name2) {
@@ -330,28 +331,28 @@ export class MenuBarComponent implements OnInit, OnDestroy {
   }
 
   removeLanguageMenu() {
-    const removeSelectionMenu = this.fileCount===0;
+    const removeSelectionMenu = this.fileCount === 0;
     for (let i = 0; i < this.menuList.length; i++) {
       if (this.currentLang && this.menuList[i].name === this.currentLang) {
-        this.menuList.splice(i,1);
+        this.menuList.splice(i, 1);
         if (!removeSelectionMenu) {
           break;
         }
         i = -1;
       } else if (removeSelectionMenu && this.menuList[i].name === 'Language') {
-        this.menuList.splice(i,1);
+        this.menuList.splice(i, 1);
         i = -1;
-      }  
+      }
     }
   }
 
   showLanguageMenu(language) {
     let menus = [];
-    if (this.fileCount===0) {//will become 1 after
+    if (this.fileCount === 0) {//will become 1 after
       //add language selection menu, too
       menus.push(this.languageSelectionMenu);
     }
-    
+
     this.removeLanguageMenu();
     if (language) {
       let menuChildren = this.languagesMenu[language];
@@ -364,8 +365,8 @@ export class MenuBarComponent implements OnInit, OnDestroy {
         this.currentLang = readableLanguage;
       }
     }
-    if (menus.length>0) {
-      this.menuList.splice(this.fileCount===0 ? 1 : 2 ,0,...menus);
+    if (menus.length > 0) {
+      this.menuList.splice(this.fileCount === 0 ? 1 : 2, 0, ...menus);
     }
   }
 
@@ -373,7 +374,7 @@ export class MenuBarComponent implements OnInit, OnDestroy {
     list[0].children.push({
       name: 'Show/Hide Tree Search',
       action: {
-          internalName: 'toggleFileTreeSearch'
+        internalName: 'toggleFileTreeSearch'
       },
       keyMap: 'Alt+P'
     });
@@ -383,7 +384,7 @@ export class MenuBarComponent implements OnInit, OnDestroy {
     list[0].children.push({
       name: 'Show/Hide Compare (Diff)',
       action: {
-          internalName: 'toggleDiffViewer'
+        internalName: 'toggleDiffViewer'
       },
       keyMap: 'Alt+V'
     });
@@ -393,17 +394,17 @@ export class MenuBarComponent implements OnInit, OnDestroy {
     list[0].children.push({
       name: 'Show/Hide File Explorer',
       action: {
-          internalName: 'toggleTree'
+        internalName: 'toggleTree'
       },
       keyMap: 'Alt+B'
     });
   }
-  
+
   ngOnInit() {
     if (this.editorControl._isTestLangMode) {
       this.log.info(`Adding test language menu`);
       this.languagesMenu['TEST_LANGUAGE'] = TEST_LANGUAGE_MENU;
-    }       
+    }
 
     this.keyBindingSub.add(this.appKeyboard.keydownEvent
       .subscribe((event) => {
@@ -429,7 +430,7 @@ export class MenuBarComponent implements OnInit, OnDestroy {
         // else if (event.which === KeyCode.KEY_S && event.ctrlKey) { TODO
         //   this.saveAll();
         // }
-    }));
+      }));
   }
 
   onMouseOver(event) {
@@ -438,7 +439,7 @@ export class MenuBarComponent implements OnInit, OnDestroy {
   }
 
   getEditorFocus() {
-    setTimeout(()=> {
+    setTimeout(() => {
       this.editorControl.getFocus();
     });
   }
@@ -446,7 +447,7 @@ export class MenuBarComponent implements OnInit, OnDestroy {
   getSearchFocus() {
     let elm = null;
     elm = document.querySelector('.filebrowseruss-search-input');
-    if(isHidden(elm)) {
+    if (isHidden(elm)) {
       elm = document.querySelector('.filebrowsermvs-search-input');
     }
     elm.focus();
@@ -457,44 +458,44 @@ export class MenuBarComponent implements OnInit, OnDestroy {
     const currentEventTarget = event.target;
     const currentTarget = event.currentTarget || document.activeElement;
     let nextFocusElement = null;
-    switch(event.which) {
+    switch (event.which) {
       case KeyCode.RIGHT_ARROW:
-          nextFocusElement = currentTarget.nextElementSibling || currentTarget.parentNode.firstElementChild;
-          break;
+        nextFocusElement = currentTarget.nextElementSibling || currentTarget.parentNode.firstElementChild;
+        break;
       case KeyCode.LEFT_ARROW:
-          nextFocusElement = currentTarget.previousElementSibling || currentTarget.parentNode.lastElementChild;
-          break;
+        nextFocusElement = currentTarget.previousElementSibling || currentTarget.parentNode.lastElementChild;
+        break;
       case KeyCode.DOWN_ARROW:
-          if(document.activeElement !== currentTarget) {
-            nextFocusElement = document.activeElement.nextElementSibling;
-            if(nextFocusElement && nextFocusElement.getAttribute('type')==='') {
-              nextFocusElement = nextFocusElement.nextElementSibling;
-            }
-          } 
-
-          if(!nextFocusElement) {
-            nextFocusElement = currentTarget.querySelector('li');
+        if (document.activeElement !== currentTarget) {
+          nextFocusElement = document.activeElement.nextElementSibling;
+          if (nextFocusElement && nextFocusElement.getAttribute('type') === '') {
+            nextFocusElement = nextFocusElement.nextElementSibling;
           }
-          break;
-      case KeyCode.UP_ARROW:
-        if(document.activeElement != currentTarget) {
-          nextFocusElement = document.activeElement.previousElementSibling;
-          if(nextFocusElement && nextFocusElement.getAttribute('type')==='') {
-            nextFocusElement = nextFocusElement.previousElementSibling;
-          }  
-        } 
-        
-        if(!nextFocusElement) {
-          const nodes = currentTarget.querySelectorAll('li');
-          nextFocusElement = nodes[nodes.length- 1];
         }
-        break;  
 
-        default:
-          break;
+        if (!nextFocusElement) {
+          nextFocusElement = currentTarget.querySelector('li');
+        }
+        break;
+      case KeyCode.UP_ARROW:
+        if (document.activeElement != currentTarget) {
+          nextFocusElement = document.activeElement.previousElementSibling;
+          if (nextFocusElement && nextFocusElement.getAttribute('type') === '') {
+            nextFocusElement = nextFocusElement.previousElementSibling;
+          }
+        }
+
+        if (!nextFocusElement) {
+          const nodes = currentTarget.querySelectorAll('li');
+          nextFocusElement = nodes[nodes.length - 1];
+        }
+        break;
+
+      default:
+        break;
     }
 
-    if(nextFocusElement) {
+    if (nextFocusElement) {
       nextFocusElement.focus();
     }
   }
@@ -505,9 +506,11 @@ export class MenuBarComponent implements OnInit, OnDestroy {
     }
     const editor = this.editorControl.editor.getValue();
     if (editor) {
-      const context = { editor: editor,
-                        controller: this.editorControl,
-                        log: this.log };
+      const context = {
+        editor: editor,
+        controller: this.editorControl,
+        log: this.log
+      };
 
       if (menuItem.internalName != null) {
         return this[menuItem.internalName].apply(this, menuItem.params ? menuItem.params : []);
@@ -533,7 +536,7 @@ export class MenuBarComponent implements OnInit, OnDestroy {
       }
     });
   }
-  
+
   openDirectory() {
     let openDirRef = this.dialog.open(OpenFolderComponent, {
       width: '500px'
@@ -553,7 +556,7 @@ export class MenuBarComponent implements OnInit, OnDestroy {
 
     openDirRef.afterClosed().subscribe(result => {
       if (result) {
-        this.editorControl.openDataset.next({datasetName: result});
+        this.editorControl.openDataset.next({ datasetName: result });
       }
     });
   }
@@ -572,8 +575,8 @@ export class MenuBarComponent implements OnInit, OnDestroy {
 
   async closeAll() {
     //TODO: Enhance such that closeAll not visible if no tabs are open
-    let closeAllRef; 
-    if (this.fileCount == 0) { 
+    let closeAllRef;
+    if (this.fileCount == 0) {
       closeAllRef = this.snackBar.open('No tabs are open.', 'Close', { duration: MessageDuration.Short, panelClass: 'center' });
     } else {
       this.editorControl.closeAllFiles.next('');
@@ -625,24 +628,24 @@ export class MenuBarComponent implements OnInit, OnDestroy {
     let fileContext = this.editorControl.fetchActiveFile();
     let directory = fileContext.model.path || this.editorControl.activeDirectory;
     if (!fileContext) {
-      this.snackBar.open('Warning: Cannot save, no content found', 'Dismiss', {duration: MessageDuration.Medium, panelClass: 'center'});
+      this.snackBar.open('Warning: Cannot save, no content found', 'Dismiss', { duration: MessageDuration.Medium, panelClass: 'center' });
     } else {
       let sub = this.monacoService.saveFile(fileContext, directory).subscribe(() => { sub.unsubscribe(); });
-    }   
+    }
   }
 
   saveAsFile() {
     let fileContext = this.editorControl.fetchActiveFile();
     let directory = fileContext.model.path || this.editorControl.activeDirectory;
     if (!fileContext) {
-      this.snackBar.open('Warning: Cannot save, no content found', 'Dismiss', {duration: MessageDuration.Medium, panelClass: 'center'});
+      this.snackBar.open('Warning: Cannot save, no content found', 'Dismiss', { duration: MessageDuration.Medium, panelClass: 'center' });
     } else {
       let sub = this.monacoService.saveFile(fileContext, directory, true).subscribe(() => { sub.unsubscribe(); });
     }
   }
 
   //saveAll() {
-   // this.editorControl.saveAllFile.emit();
+  // this.editorControl.saveAllFile.emit();
   //}
 
   menuLabel(item) {
@@ -712,13 +715,13 @@ export class MenuBarComponent implements OnInit, OnDestroy {
   }
 
   createFile() {
-    setTimeout(()=> {
+    setTimeout(() => {
       this.editorControl.createFile();
     });
   }
 
   createDirectory() {
-    setTimeout(()=> {
+    setTimeout(() => {
       this.editorControl.createDirectory.next('');
     });
   }
@@ -761,7 +764,7 @@ export class MenuBarComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy():void {
+  ngOnDestroy(): void {
     this.keyBindingSub.unsubscribe();
     this.dialog.closeAll();
   }

@@ -39,11 +39,12 @@ const config = {
       '~': path.resolve(__dirname, './node_modules/'),
     },
     fallback: {
-      "path": false, // require.resolve("path-browserify"),
-      "os": false, // require.resolve("os-browserify/browser"),
-      "crypto": false, // require.resolve("crypto-browserify"),
-      "stream": false, // require.resolve("stream-browserify"),
-      "vm": false, // require.resolve("vm-browserify")
+      "path": false,
+      "os": false,
+      "crypto": false,
+      "stream": false,
+      "vm": false,
+      "net": false
     }
   },
   module: {
